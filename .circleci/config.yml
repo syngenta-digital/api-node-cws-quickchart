@@ -1,0 +1,48 @@
+## This is the CircleCI configuration for deployment of api-nodejs-cws-quickchart
+# TODO:
+#   * 
+version: 2.1
+parameters:
+  image-tag:
+    type: string
+    default: "latest"
+  project-dir:
+    type: string
+    default: ./
+  application_name:
+    type: string
+    default: api-nodejs-cws-quickchart
+
+jobs:
+  build_and_deploy_azure: 
+    parameters:
+      DOCKER_IMAGE_TAG:
+          type: string
+      PORTFOLIO:
+          type: string
+          default: cropwise
+    machine:
+      image: ubuntu-2004:202201-02
+    steps:
+      - checkout
+      - run:
+          name: Authenticate Docker
+          command: docker login ${ACR_DOCKER_REPO} --username ${ACR_DOCKER_USERNAME} --password ${ACR_DOCKER_PASSWORD}
+      - run:
+          name: Build Dockerfile
+          command: docker build --pull -f Dockerfile --build-arg=CIRCLE_BRANCH --build-arg=CIRCLE_TAG --build-arg=CIRCLE_SHA1 --build-arg=CIRCLE_BUILD_URL -t ${ACR_DOCKER_REPO}/<<parameters.PORTFOLIO>>/${CIRCLE_PROJECT_REPONAME}:<<parameters.DOCKER_IMAGE_TAG>> .
+      - run:
+          name: Push dockerfile
+          command: docker push ${ACR_DOCKER_REPO}/<<parameters.PORTFOLIO>>/${CIRCLE_PROJECT_REPONAME}:<<parameters.DOCKER_IMAGE_TAG>>
+
+workflows:
+  build-and-deploy-azure-production:
+    jobs:
+      - build_and_deploy_azure:
+          context: 
+            - cropwise-seeds-cicd
+          filters:
+              branches:
+                only:
+                  - todo_never_run
+          DOCKER_IMAGE_TAG: production
