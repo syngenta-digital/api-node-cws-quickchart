@@ -1,4 +1,4 @@
-QuickChart
+QuickChart (Forked)
 ---
 [![Build Status](https://api.travis-ci.com/typpo/quickchart.svg?branch=master)](https://travis-ci.com/typpo/quickchart)
 
